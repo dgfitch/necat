@@ -1,0 +1,3 @@
+[submodule "love/LUPUS"]
+	path = love/LUPUS
+	url = git://github.com/jpfed/LUPUS.git

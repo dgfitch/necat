@@ -10,4 +10,4 @@ states.Menu = {
   end,
 }
 
-Base.mixin(State, states.Menu)
+Base.mixin(states.Menu, State)

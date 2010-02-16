@@ -4,11 +4,10 @@ State = Base:create({
   update = function(s, dt) end,
   activate = function(s) end,
   initialize = function(s) end,
+  change = function(i)
+    S = i
+    S:activate()
+  end,
 })
-
-function changeState(i)
-  S = i
-  S:activate()
-end
 
 requireDir "states/"

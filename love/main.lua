@@ -1,11 +1,12 @@
-package.path = "LUPUS\\?.lua;" .. package.path
+package.path = arg[1] .. "/LUPUS/?.lua;" .. package.path
 require 'lib/load'
-requireDir "LUPUS/"
+require 'LUPUS/base'
+--requireDir "LUPUS/"
 requireDir "lib/"
 
 function love.load()
   states.Menu:initialize()
-  changeState(states.Menu)
+  State.change(states.Menu)
 end
 
 function love.draw()

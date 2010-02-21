@@ -72,8 +72,77 @@ class Sketch < Processing::App
     end
   end
 
+  class Edge
+    attr_reader :hex
+    def initialize(hex)
+      @hex = hex
+    end
+
+    def prepare
+      stroke_width 2
+      @focus = false
+      if @hex.focus then
+        # TODO: Figure out of this edge is in focus
+        index = @hex.edges.index(self)
+        @alpha = 100
+      else
+        @alpha = 200
+      end
+    end
+
+    def draw(s,h,r)
+      stroke_width 1
+      stroke 40
+      line 0, 0, -4, -4
+
+      prepare
+
+      begin_shape
+      vertex -4, -4
+      case @hex.edges.index(self)
+      when 0
+        vertex 0, -r
+        vertex s, h - r
+      when 1
+        vertex s, h - r
+        vertex s, r - h
+      when 2
+        vertex s, r - h
+        vertex 0, r
+      when 3
+        vertex 0, r
+        vertex -s, r - h
+      when 4
+        vertex -s, r - h
+        vertex -s, h - r
+      when 5
+        vertex -s, h - r
+        vertex 0, -r
+      end
+      vertex -4, -4
+      end_shape
+    end
+  end
+
+  class ClockwiseEdge < Edge
+    def prepare
+      super
+      stroke 20, 50, 200, @alpha
+      fill 40, 70, 220, @alpha
+    end
+  end
+
+  class FlipEdge < Edge
+    def prepare
+      super
+      stroke 200, 50, 50, @alpha
+      fill 220, 70, 70, @alpha
+    end
+  end
+
   class Hex
     attr_accessor :x, :y, :r
+    attr_reader :edges, :board, :focus
     def initialize(board, x = 0, y = 0)
       @board = board
       @edges = [ random_edge, random_edge, random_edge, random_edge, random_edge, random_edge ]
@@ -81,9 +150,11 @@ class Sketch < Processing::App
 
     def random_edge
       if random(1) > 0.9 then
-        random(3).to_i
+        ClockwiseEdge.new(self)
+      elsif random(1) > 0.9 then
+        FlipEdge.new(self)
       else
-        0
+        nil
       end
     end
     
@@ -95,10 +166,13 @@ class Sketch < Processing::App
       d = dist(x, y, mouseX, mouseY)
       # TODO: Should do an actual intersection if we're close
       if d < @r then
+        @focus = true
         fill 240
       else
+        @focus = false
         fill 200
       end
+
       push_matrix
       translate x, y
       stroke_width 2
@@ -112,8 +186,14 @@ class Sketch < Processing::App
       vertex -@s, @h - @r
       vertex 0, -@r
       end_shape
+
+      stroke_width 1
+      stroke 100
+      line 0, -@r, 0, @r
+      line @s, @h - @r, -@s, @r - @h
+      line @s, @r - @h, -@s, @h - @r
       
-      6.times { |x| draw_edge x }
+      @edges.each { |edge| edge.draw(@s,@h,@r) if edge }
       
       pop_matrix
     end
@@ -122,45 +202,6 @@ class Sketch < Processing::App
       @board.neighbor(@x, @y, n)
     end
 
-    def draw_edge(n)
-      stroke_width 3
-
-      case @edges[n]
-      when 0
-        return
-      when 1
-        stroke 200, 50, 50
-        fill 220, 70, 70
-      when 2
-        stroke 20, 50, 200
-        fill 40, 70, 220
-      end
-
-      begin_shape
-      vertex 0, 0
-      case n
-      when 0
-        vertex 0, -@r
-        vertex @s, @h - @r
-      when 1
-        vertex @s, @h - @r
-        vertex @s, @r - @h
-      when 2
-        vertex @s, @r - @h
-        vertex 0, @r
-      when 3
-        vertex 0, @r
-        vertex -@s, @r - @h
-      when 4
-        vertex -@s, @r - @h
-        vertex -@s, @h - @r
-      when 5
-        vertex -@s, @h - @r
-        vertex 0, -@r
-      end
-      vertex 0, 0
-      end_shape
-    end
 
     def advance_flip
     end
@@ -179,16 +220,16 @@ class Sketch < Processing::App
 
     @board = Board.new
 
-    @frame_time = nil
-    @frame_count = 0
+    $frame_time = nil
+    $frame_count = 0
   end
 
 
   def draw
     t = Time.now
-    fps = 1.0 / (t - @frame_time) if @frame_time
-    @frame_time = t
-    @frame_count += 1
+    fps = 1.0 / (t - $frame_time) if $frame_time
+    $frame_time = t
+    $frame_count += 1
 
     background 50
 
@@ -199,6 +240,13 @@ class Sketch < Processing::App
   def key_pressed
     case key
       when 'a' then @board.advance
+    end
+  end
+
+  def mouse_pressed
+    case mouse_button
+    when LEFT then puts "L"
+    when RIGHT then puts "R"
     end
   end
 end

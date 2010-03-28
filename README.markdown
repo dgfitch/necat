@@ -1,3 +1,7 @@
 # Necat
 
-Experimenting with jpfed's [LUPUS](http://github.com/jpfed/LUPUS/) and LOVE.
+Experimenting with puzzle mechanics.
+
+    gem install ruby-processing
+    rp5 run necat.rb
+

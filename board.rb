@@ -14,4 +14,7 @@ class Board
     @hexes << x
   end
 
+  def inspect
+    "<Board:#{hexes.length} hexes>"
+  end
 end

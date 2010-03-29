@@ -5,6 +5,7 @@ describe Hex do
     hex = Hex.new nil
     hex.edge_w.class.should == EmptyEdge
     hex.edge_e.hex.should == hex
+    hex.edge_e.should be_active
   end
 
   it "calculates opposite edges" do
@@ -31,6 +32,17 @@ describe Hex do
     e1.exchange_with e2
     hex.edge_w.should == e2
     hex.w.edge_e.should == e1
+    e1.should be_transitioning
+  end
+
+  it "updates active on edges" do
+    hex = Hex.new nil
+    e1 = hex.edge_w
+    e2 = hex.edge_e
+    e1.exchange_with e2
+    e1.should_not be_active
+    hex.update 10000
+    e1.should be_active
   end
 end
 

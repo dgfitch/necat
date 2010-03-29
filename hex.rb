@@ -1,12 +1,20 @@
 require 'edge'
 
+SPEED ||= 0.1
+
 class Hex
-  attr_accessor :w, :e, :nw, :ne, :sw, :se
+  attr_accessor :w, :e, :nw, :ne, :sw, :se, :x, :y
 
   def initialize board
     @board = board
     @board.add self if @board
     @edges = (0..5).map { |i| EmptyEdge.new(self) }
+    @x = 0
+    @y = 0
+  end
+
+  def update dt
+    @edges.each { |e| e.update dt }
   end
 
   def edge_w;  @edges[0]; end
@@ -26,6 +34,8 @@ class Hex
   def expand
     unless @w then
       @w = Hex.new @board
+      @w.x = self.x - 2
+      @w.y = self.y
       @w.e = self
       if @nw
         @w.ne = @nw
@@ -39,6 +49,8 @@ class Hex
 
     unless @e then
       @e = Hex.new @board
+      @e.x = self.x + 2
+      @e.y = self.y
       @e.w = self
       if @ne
         @e.nw = @ne
@@ -52,6 +64,8 @@ class Hex
 
     unless @nw then
       @nw = Hex.new @board
+      @nw.x = self.x - 1
+      @nw.y = self.y - 1
       @nw.se = self
       if @w
         @nw.sw = @w
@@ -65,6 +79,8 @@ class Hex
 
     unless @ne then
       @ne = Hex.new @board
+      @ne.x = self.x + 1
+      @ne.y = self.y - 1
       @ne.sw = self
       if @e
         @ne.se = @e
@@ -78,6 +94,8 @@ class Hex
 
     unless @sw then
       @sw = Hex.new @board
+      @sw.x = self.x - 1
+      @sw.y = self.y + 1
       @sw.ne = self
       if @w
         @sw.nw = @w
@@ -91,6 +109,8 @@ class Hex
 
     unless @se then
       @se = Hex.new @board
+      @se.x = self.x + 1
+      @se.y = self.y + 1
       @se.nw = self
       if @e
         @se.ne = @e

@@ -25,5 +25,16 @@ describe Board do
     c.sw.w.should == c.w.sw
   end
 
+  it "calculates x and y coordinates for a given hex" do
+    board = Board.new 2
+    c = board.center
+    c.x.should == 0
+    c.y.should == 0
+    c.w.x.should == -2
+    c.w.y.should == 0
+    c.ne.x.should == 1
+    c.ne.y.should == -1
+  end
+
 end
 

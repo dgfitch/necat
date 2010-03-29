@@ -1,3 +1,5 @@
+SPEED = 0.1
+
 require 'hex'
 
 class Board
@@ -12,6 +14,10 @@ class Board
   end
   def add x
     @hexes << x
+  end
+  
+  def update dt
+    @hexes.each { |h| h.update dt }
   end
 
   def inspect

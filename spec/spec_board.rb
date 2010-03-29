@@ -1,4 +1,4 @@
-require 'board.rb'
+require 'board'
 
 describe Board do
   it "has 1 hex for radius 0" do

@@ -1,8 +1,15 @@
 class Hex
   attr_accessor :w, :e, :nw, :ne, :sw, :se
+  attr_accessor :edge_w, :edge_e, :edge_nw, :edge_ne, :edge_sw, :edge_se
   def initialize board
     @board = board
-    @board.add self
+    @board.add self if @board
+    @edge_w = EmptyEdge.new
+    @edge_e = EmptyEdge.new
+    @edge_nw = EmptyEdge.new
+    @edge_ne = EmptyEdge.new
+    @edge_sw = EmptyEdge.new
+    @edge_se = EmptyEdge.new
   end
 
   def expand

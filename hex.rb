@@ -2,17 +2,26 @@ require 'edge'
 
 class Hex
   attr_accessor :w, :e, :nw, :ne, :sw, :se
-  attr_accessor :edge_w, :edge_e, :edge_nw, :edge_ne, :edge_sw, :edge_se
+
   def initialize board
     @board = board
     @board.add self if @board
-    @edge_w = EmptyEdge.new self
-    @edge_e = EmptyEdge.new self
-    @edge_nw = EmptyEdge.new self
-    @edge_ne = EmptyEdge.new self
-    @edge_sw = EmptyEdge.new self
-    @edge_se = EmptyEdge.new self
+    @edges = (0..5).map { |i| EmptyEdge.new(self) }
   end
+
+  def edge_w;  @edges[0]; end
+  def edge_nw; @edges[1]; end
+  def edge_ne; @edges[2]; end
+  def edge_e;  @edges[3]; end
+  def edge_se; @edges[4]; end
+  def edge_sw; @edges[5]; end
+
+  def edge_w= x;  @edges[0] = x; end
+  def edge_nw= x; @edges[1] = x; end
+  def edge_ne= x; @edges[2] = x; end
+  def edge_e= x;  @edges[3] = x; end
+  def edge_se= x; @edges[4] = x; end
+  def edge_sw= x; @edges[5] = x; end
 
   def expand
     unless @w then
@@ -96,12 +105,30 @@ class Hex
 
   def adjacent_edge edge
     raise "failure" if edge.hex != self
-    return @w.edge_e   if edge == @edge_w
-    return @e.edge_w   if edge == @edge_e
-    return @sw.edge_ne if edge == @edge_sw
-    return @se.edge_nw if edge == @edge_se
-    return @nw.edge_se if edge == @edge_nw
-    return @ne.edge_sw if edge == @edge_ne
+    return @w.edge_e   if edge == edge_w
+    return @e.edge_w   if edge == edge_e
+    return @sw.edge_ne if edge == edge_sw
+    return @se.edge_nw if edge == edge_se
+    return @nw.edge_se if edge == edge_nw
+    return @ne.edge_sw if edge == edge_ne
+  end
+
+  def replace_edge(old, new)
+    case old
+    when edge_w:  self.edge_w  = new
+    when edge_e:  self.edge_e  = new
+    when edge_se: self.edge_se = new
+    when edge_sw: self.edge_sw = new
+    when edge_ne: self.edge_ne = new
+    when edge_nw: self.edge_nw = new
+    end
+  end
+
+  def swap_edges(old, new)
+    old_index = @edges.index old
+    new_index = @edges.index new
+    @edges[old_index] = new
+    @edges[new_index] = old
   end
 
   def inspect

@@ -1,9 +1,11 @@
 require 'edge'
 
 SPEED ||= 0.1
+DENSITY ||= 0.4
 
 class Hex
   attr_accessor :w, :e, :nw, :ne, :sw, :se, :x, :y
+  attr_reader :edges
 
   def initialize board
     @board = board
@@ -11,6 +13,24 @@ class Hex
     @edges = (0..5).map { |i| EmptyEdge.new(self) }
     @x = 0
     @y = 0
+  end
+
+  def randomize
+    @edges = (0..5).map { |i| random_edge }
+  end
+
+  def random_edge
+    if rand > (1.0 - DENSITY) then
+      if rand < 0.3 then
+        ClockwiseEdge.new self
+      elsif rand < 0.3 then
+        CounterClockwiseEdge.new self
+      else
+        FlipEdge.new self
+      end
+    else
+      EmptyEdge.new self
+    end
   end
 
   def update dt

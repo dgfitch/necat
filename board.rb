@@ -1,4 +1,5 @@
 SPEED = 0.1
+DENSITY = 0.1
 
 require 'hex'
 
@@ -22,5 +23,12 @@ class Board
 
   def inspect
     "<Board:#{hexes.length} hexes>"
+  end
+
+  def randomize
+    @hexes.each &:randomize
+  end
+
+  def click
   end
 end

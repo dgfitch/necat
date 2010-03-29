@@ -11,16 +11,15 @@ require 'board'
 class Necat < Processing::App
   def setup
     smooth
-    #no_stroke
     stroke_width 2
     frame_rate 30
     rect_mode RADIUS
 
     @board = Board.new BOARD_SIZE
+    @board.randomize
 
     @frame_time = nil
     $frame_count = 0
-    puts SCREEN_WIDTH
   end
 
   def draw
@@ -35,8 +34,32 @@ class Necat < Processing::App
 
     @board.update dt
     @board.hexes.each do |hex|
-      draw_hex(hex, BOARD_SIZE / 0.12)
+      draw_hex(hex, 120 / BOARD_SIZE)
     end
+  end
+  
+  def draw_edge edge, focus, r, s, h
+    a = focus ? 180 : 255
+    case edge
+    when FlipEdge:
+      fill 240, 40, 40, a
+      stroke 120, 20, 20
+    when ClockwiseEdge:
+      fill 40, 140, 240, a
+      stroke 20, 40, 120
+    when CounterClockwiseEdge:
+      fill 140, 40, 240, a
+      stroke 40, 20, 120
+    else
+      fill 10, 10, 20, a
+      stroke 0
+    end
+    begin_shape
+    offset = r / 8.0
+    vertex -offset/2.0, 0
+    vertex -s + offset, h - r + offset
+    vertex -s + offset, r - h - offset
+    end_shape
   end
 
   def draw_hex hex, r
@@ -46,19 +69,20 @@ class Necat < Processing::App
     @h ||= @r / 2
     @s ||= Math.sin(radians(60)) * @r
 
-    d = dist(x, y, mouseX, mouseY)
     # TODO: Should do an actual intersection if we're close
-    if d < @r then
-      #hex.focus = true
-      fill 240
+    # TODO: Would also be nice to figure out what edge triangle is closest
+    if dist(x, y, mouseX, mouseY) < @r then
+      focus = true
+      @last_focus = hex
+      fill 180
     else
-      #hex.focus = false
-      fill 200
+      focus = false
+      fill 40
     end
 
     push_matrix
     translate x, y
-    stroke_width 2
+    stroke_width 2.0 * SIZE
     stroke 0
     begin_shape
     vertex 0, -@r
@@ -70,11 +94,13 @@ class Necat < Processing::App
     vertex 0, -@r
     end_shape
 
-    stroke_width 1
-    stroke 100
-    line 0, -@r, 0, @r
-    line @s, @h - @r, -@s, @r - @h
-    line @s, @r - @h, -@s, @h - @r
+    stroke_width 1.0 * SIZE
+    (0..5).each do |n|
+      push_matrix
+      rotate(radians(60*n))
+      draw_edge hex.edges[n], focus, @r, @s, @h
+      pop_matrix
+    end
     
     #@edges.values.compact.each { |edge| edge.draw(fps,@s,@h,@r) }
     
@@ -88,11 +114,10 @@ class Necat < Processing::App
   end
 
   def mouse_pressed
-    @board.mouse_pressed = mouse_button
+    @board.click last_focus
   end
 
   def mouse_released
-    @board.mouse_pressed = nil
   end
 end
 

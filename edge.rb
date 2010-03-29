@@ -42,3 +42,9 @@ end
 
 class FlipEdge < Edge
 end
+
+class ClockwiseEdge < Edge
+end
+
+class CounterClockwiseEdge < Edge
+end

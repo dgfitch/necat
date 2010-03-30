@@ -45,9 +45,27 @@ describe Hex do
     e1.should be_active
   end
 
+  it "is inactive if any of its edges are inactive" do
+    hex = Hex.new nil
+    hex.should be_active
+    e1 = hex.edge_w
+    e2 = hex.edge_e
+    e1.exchange_with e2
+    hex.should_not be_active
+    hex.update 10000
+    hex.should be_active
+  end
+
   it "defaults center to 0,0" do
     hex = Hex.new nil
     hex.center.should == [0,0]
+  end
+
+  it "rotates" do
+    hex = Hex.new nil
+    e1 = hex.edge_w
+    hex.rotate_clockwise
+    hex.edge_nw.should == e1
   end
 end
 

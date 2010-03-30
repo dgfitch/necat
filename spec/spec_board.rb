@@ -43,8 +43,21 @@ describe Board do
 
   it "turns screen coordinates into edges" do
     board = Board.new :size => 4
-    edge = board.input.click( (SCREEN_WIDTH / 2 - 5), (SCREEN_HEIGHT / 2) )
+
+    edge = board.input.edge_at( (SCREEN_WIDTH / 2 - 10), (SCREEN_HEIGHT / 2) )
     edge.should == board.center.edge_w
+
+    edge = board.input.edge_at( (SCREEN_WIDTH / 2 + 10), (SCREEN_HEIGHT / 2) )
+    edge.should == board.center.edge_e
+
+    edge = board.input.edge_at( (SCREEN_WIDTH / 2 - 10), (SCREEN_HEIGHT / 2 - 15) )
+    edge.should == board.center.edge_nw
+
+    edge = board.input.edge_at( (SCREEN_WIDTH / 2 + 10), (SCREEN_HEIGHT / 2 + 15) )
+    edge.should == board.center.edge_se
+
+    edge = board.input.edge_at( (SCREEN_WIDTH / 2 - HEX_RADIUS - 10), (SCREEN_HEIGHT / 2) )
+    edge.should == board.center.w.edge_e
   end
 end
 

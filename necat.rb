@@ -7,11 +7,14 @@ class Necat < Processing::App
     frame_rate 30
     rect_mode RADIUS
 
-    @board = Board.new
+    @cache = {}
+    @board = Board.new :size => 3
     @board.randomize
 
     @frame_time = nil
     $frame_count = 0
+
+    @font = createFont("Arial Bold",48)
   end
 
   def draw
@@ -25,32 +28,52 @@ class Necat < Processing::App
     fill 240
 
     @board.update dt
+    @focus_edge = @board.input.edge_at mouseX, mouseY
     @board.hexes.each do |hex|
       draw_hex hex
     end
+
+    textFont(@font, 24)
+    text "#{frame_rate.to_i} eXtr3ME FPS",20,40
   end
   
-  def draw_edge edge, focus, r, s, h
-    a = focus ? 180 : 255
+  def draw_edge edge, focus
+    a = focus ? 255 : 200
+
+    if focus
+      @cache[:focus_extent] ||= -@s
+      @cache[:focus_p1]     ||= @h - @r
+      @cache[:focus_p2]     ||= @r - @h
+      fill 0, 0, 0, a
+      begin_shape
+      vertex 0, 0
+      vertex @cache[:focus_extent], @cache[:focus_p1]
+      vertex @cache[:focus_extent], @cache[:focus_p2]
+      end_shape
+    end
+
     case edge
-    when FlipEdge:
+    when FlipAdjacentEdge:
       fill 240, 40, 40, a
-      stroke 120, 20, 20
+    when FlipOppositeEdge:
+      fill 140, 240, 40, a
     when ClockwiseEdge:
       fill 40, 140, 240, a
-      stroke 20, 40, 120
     when CounterClockwiseEdge:
       fill 140, 40, 240, a
-      stroke 40, 20, 120
     else
       fill 10, 10, 20, a
-      stroke 0
     end
+
     begin_shape
-    offset = r / 8.0
-    vertex -offset/2.0, 0
-    vertex -s + offset, h - r + offset
-    vertex -s + offset, r - h - offset
+    @cache[:offset] ||= @r / 8.0
+    @cache[:center_offset] ||= @cache[:offset] / -2.0
+    @cache[:extent] ||= @cache[:offset] - @s
+    @cache[:p1]     ||= @h - @r + @cache[:offset]
+    @cache[:p2]     ||= @r - @h - @cache[:offset]
+    vertex @cache[:center_offset], 0
+    vertex @cache[:extent], @cache[:p1]
+    vertex @cache[:extent], @cache[:p2]
     end_shape
   end
 
@@ -65,10 +88,10 @@ class Necat < Processing::App
     if dist(x, y, mouseX, mouseY) < @r then
       focus = true
       @last_focus = hex
-      fill 180
+      fill 40
     else
       focus = false
-      fill 40
+      fill 20
     end
 
     push_matrix
@@ -85,11 +108,12 @@ class Necat < Processing::App
     vertex 0, -@r
     end_shape
 
-    stroke_width 1.0 * SIZE
-    (0..5).each do |n|
+    no_stroke
+    hex.edges.each_with_index do |edge, n|
       push_matrix
       rotate(radians(60*n))
-      draw_edge hex.edges[n], focus, @r, @s, @h
+      focus_edge = edge == @focus_edge
+      draw_edge edge, focus_edge
       pop_matrix
     end
     
@@ -103,10 +127,10 @@ class Necat < Processing::App
   end
 
   def mouse_pressed
-    @last_clicked = @board.input.click mouseX, mouseY
-  end
-
-  def mouse_released
+    @last_clicked = @board.input.edge_at mouseX, mouseY
+    if @last_clicked and @last_clicked.active?
+      @last_clicked.click
+    end
   end
 end
 

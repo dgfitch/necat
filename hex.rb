@@ -1,8 +1,5 @@
 require 'edge'
 
-SPEED ||= 0.1
-DENSITY ||= 0.4
-
 class Hex
   attr_accessor :w, :e, :nw, :ne, :sw, :se, :x, :y
   attr_reader :edges
@@ -44,13 +41,15 @@ class Hex
   end
 
   def random_edge
-    if rand > (1.0 - DENSITY) then
+    if rand > (1.0 - (DENSITY || 0.4)) then
       if rand < 0.3 then
         ClockwiseEdge.new self
       elsif rand < 0.3 then
         CounterClockwiseEdge.new self
+      elsif rand < 0.2 then
+        FlipOppositeEdge.new self
       else
-        FlipEdge.new self
+        FlipAdjacentEdge.new self
       end
     else
       EmptyEdge.new self
@@ -169,12 +168,13 @@ class Hex
 
   def adjacent_edge edge
     raise "failure" if edge.hex != self
-    return @w.edge_e   if edge == edge_w
-    return @e.edge_w   if edge == edge_e
-    return @sw.edge_ne if edge == edge_sw
-    return @se.edge_nw if edge == edge_se
-    return @nw.edge_se if edge == edge_nw
-    return @ne.edge_sw if edge == edge_ne
+    return @w.edge_e   if edge == edge_w  and @w
+    return @e.edge_w   if edge == edge_e  and @e
+    return @sw.edge_ne if edge == edge_sw and @sw
+    return @se.edge_nw if edge == edge_se and @se
+    return @nw.edge_se if edge == edge_nw and @nw
+    return @ne.edge_sw if edge == edge_ne and @ne
+    return nil
   end
 
   def replace_edge(old, new)
@@ -195,7 +195,21 @@ class Hex
     @edges[new_index] = old
   end
 
+  def rotate_clockwise
+    last = @edges.pop
+    @edges.unshift last
+  end
+
+  def rotate_counterclockwise
+    first = @edges.shift
+    @edges.push first
+  end
+
+  def active?
+    not edges.any? {|e| not e.active? }
+  end
+
   def inspect
-    "<Hex:...>"
+    "<Hex:#{@x},#{@y}>"
   end
 end

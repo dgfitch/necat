@@ -9,11 +9,15 @@ class Input
     Math.sqrt(lx ** 2 + ly ** 2)
   end
 
-  def click mx, my
+  def edge_at mx, my
     @board.hexes.each do |h|
       hx, hy = h.center
       if dist(hx, hy, mx, my) < HEX_RADIUS then
-        return h.edge_w
+        vector_x = mx - hx
+        vector_y = my - hy
+        angle = Math.atan2(vector_y, vector_x)
+        tri_index = (((180*angle/Math::PI)+30)/60).floor - 3
+        return h.edges[tri_index]
       end
     end
     return nil

@@ -11,8 +11,32 @@ class Hex
     @board = board
     @board.add self if @board
     @edges = (0..5).map { |i| EmptyEdge.new(self) }
-    @x = 0
-    @y = 0
+    self.x = 0
+    self.y = 0
+  end
+
+  def x= v
+    @x = v
+    update_center
+  end
+
+  def y= v
+    @y = v
+    update_center
+  end
+
+  def update_center
+    if @board and @x and @y then
+      x = (SCREEN_WIDTH  || 600.0) / 2.0 + (@x * @board.hex_spacing_w)
+      y = (SCREEN_HEIGHT || 600.0) / 2.0 + (@y * @board.hex_spacing_h)
+      @center = [x,y]
+    else
+      [0,0]
+    end
+  end
+
+  def center
+    @center || update_center
   end
 
   def randomize

@@ -44,5 +44,10 @@ describe Hex do
     hex.update 10000
     e1.should be_active
   end
+
+  it "defaults center to 0,0" do
+    hex = Hex.new nil
+    hex.center.should == [0,0]
+  end
 end
 

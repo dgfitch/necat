@@ -1,11 +1,3 @@
-SIZE = 1.0
-SCREEN_WIDTH = 600.0
-SCREEN_HEIGHT = 600.0
-
-BOARD_SIZE = 4
-SPEED = 0.1
-DENSITY = 0.4
-
 require 'board'
 
 class Necat < Processing::App
@@ -15,7 +7,7 @@ class Necat < Processing::App
     frame_rate 30
     rect_mode RADIUS
 
-    @board = Board.new BOARD_SIZE
+    @board = Board.new
     @board.randomize
 
     @frame_time = nil
@@ -34,7 +26,7 @@ class Necat < Processing::App
 
     @board.update dt
     @board.hexes.each do |hex|
-      draw_hex(hex, 120 / BOARD_SIZE)
+      draw_hex hex
     end
   end
   
@@ -62,10 +54,9 @@ class Necat < Processing::App
     end_shape
   end
 
-  def draw_hex hex, r
-    x = (SCREEN_WIDTH  / 2.0) + (hex.x * r)
-    y = (SCREEN_HEIGHT / 2.0) + (hex.y * r * 1.75)
-    @r ||= r
+  def draw_hex hex
+    x, y = hex.center
+    @r ||= HEX_RADIUS
     @h ||= @r / 2
     @s ||= Math.sin(radians(60)) * @r
 
@@ -102,8 +93,6 @@ class Necat < Processing::App
       pop_matrix
     end
     
-    #@edges.values.compact.each { |edge| edge.draw(fps,@s,@h,@r) }
-    
     pop_matrix
   end
 
@@ -114,7 +103,7 @@ class Necat < Processing::App
   end
 
   def mouse_pressed
-    @board.click last_focus
+    @last_clicked = @board.input.click mouseX, mouseY
   end
 
   def mouse_released
